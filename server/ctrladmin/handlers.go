@@ -13,6 +13,13 @@ import (
 	"strconv"
 	"time"
 
+	"image"
+	_ "image/gif" // Needed to decode uploaded GIFs
+	"image/jpeg"
+	_ "image/png" // Needed to decode uploaded PNGs
+
+	"github.com/nfnt/resize"
+
 	"github.com/mmcdole/gofeed"
 	"github.com/nfnt/resize"
 
@@ -145,6 +152,7 @@ func (c *Controller) ServeChangeOwnAvatarDo(r *http.Request) *Response {
 			flashW:   []string{err.Error()},
 		}
 	}
+
 	user.Avatar = avatar
 	c.DB.Save(user)
 	return &Response{redirect: "/admin/home"}
@@ -306,6 +314,7 @@ func (c *Controller) ServeChangeAvatarDo(r *http.Request) *Response {
 			flashW:   []string{err.Error()},
 		}
 	}
+
 	user.Avatar = avatar
 	c.DB.Save(user)
 	return &Response{redirect: "/admin/home"}
@@ -354,6 +363,13 @@ func (c *Controller) ServeCreateUser(r *http.Request) *Response {
 }
 
 func (c *Controller) ServeCreateUserDo(r *http.Request) *Response {
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		return &Response{
+			redirect: r.Referer(),
+			flashW:   []string{err.Error()},
+		}
+	}
 	username := r.FormValue("username")
 	if err := validateUsername(username); err != nil {
 		return &Response{
@@ -369,9 +385,12 @@ func (c *Controller) ServeCreateUserDo(r *http.Request) *Response {
 			flashW:   []string{err.Error()},
 		}
 	}
+	avatar := []byte{}
+	_ = getAvatarFile(r, &avatar)
 	user := db.User{
 		Name:     username,
 		Password: passwordOne,
+		Avatar:   avatar,
 	}
 	if err := c.DB.Create(&user).Error; err != nil {
 		return &Response{
