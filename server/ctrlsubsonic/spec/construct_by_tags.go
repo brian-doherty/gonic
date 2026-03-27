@@ -22,7 +22,7 @@ func NewAlbumByTags(a *db.Album, artists []*db.Artist) *Album {
 		Genres:        []*GenreRef{},
 		Year:          a.TagYear,
 		Tracks:        []*TrackChild{},
-		AverageRating: formatRating(a.AverageRating),
+		AverageRating: a.AverageRating,
 		IsCompilation: a.TagCompilation,
 		ReleaseTypes:  formatReleaseTypes(a.TagReleaseType),
 		DiscTitles:    []*DiscTitle{},
@@ -97,7 +97,7 @@ func NewTrackByTags(t *db.Track, album *db.Album) *TrackChild {
 		DiscNumber:         t.TagDiscNumber,
 		Type:               "music",
 		MusicBrainzID:      t.TagBrainzID,
-		AverageRating:      formatRating(t.AverageRating),
+		AverageRating:      t.AverageRating,
 		TranscodeMeta:      TranscodeMeta{},
 		Year:               t.TagYear,
 	}
@@ -162,7 +162,7 @@ func NewArtistByTags(a *db.Artist) *Artist {
 		Name:          a.Name,
 		AlbumCount:    a.AlbumCount,
 		Albums:        []*Album{},
-		AverageRating: formatRating(a.AverageRating),
+		AverageRating: a.AverageRating,
 	}
 	if a.Info != nil && a.Info.ImageURL != "" {
 		r.CoverID = a.SID()

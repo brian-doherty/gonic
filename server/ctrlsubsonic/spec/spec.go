@@ -165,7 +165,7 @@ type Album struct {
 	// star / rating
 	Starred       *time.Time `xml:"starred,attr,omitempty"         json:"starred,omitempty"`
 	UserRating    int        `xml:"userRating,attr,omitempty"      json:"userRating,omitempty"`
-	AverageRating string     `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
+	AverageRating float64    `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
 }
 
 type RandomTracks struct {
@@ -228,7 +228,7 @@ type TrackChild struct {
 	// star / rating
 	Starred       *time.Time `xml:"starred,attr,omitempty"         json:"starred,omitempty"`
 	UserRating    int        `xml:"userRating,attr,omitempty"      json:"userRating,omitempty"`
-	AverageRating string     `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
+	AverageRating float64    `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
 
 	ReplayGain *ReplayGain `xml:"replayGain" json:"replayGain"`
 
@@ -249,7 +249,7 @@ type Artist struct {
 	// star / rating
 	Starred       *time.Time `xml:"starred,attr,omitempty"       json:"starred,omitempty"`
 	UserRating    int        `xml:"userRating,attr,omitempty"    json:"userRating,omitempty"`
-	AverageRating string     `xml:"averageRating,attr,omitempty" json:"averageRating,omitempty"`
+	AverageRating float64    `xml:"averageRating,attr,omitempty" json:"averageRating,omitempty"`
 }
 
 type Indexes struct {
@@ -269,7 +269,7 @@ type Directory struct {
 	Name          string        `xml:"name,attr,omitempty"            json:"name"`
 	Starred       *time.Time    `xml:"starred,attr,omitempty"         json:"starred,omitempty"`
 	UserRating    int           `xml:"userRating,attr,omitempty"      json:"userRating,omitempty"`
-	AverageRating string        `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
+	AverageRating float64       `xml:"averageRating,attr,omitempty"   json:"averageRating,omitempty"`
 	Children      []*TrackChild `xml:"child,omitempty"                json:"child,omitempty"`
 }
 
@@ -506,13 +506,6 @@ type OpenSubsonicExtension struct {
 }
 
 type OpenSubsonicExtensions []OpenSubsonicExtension
-
-func formatRating(rating float64) string {
-	if rating == 0 {
-		return ""
-	}
-	return fmt.Sprintf("%.2f", rating)
-}
 
 func formatExt(ext string) string {
 	return strings.TrimPrefix(ext, ".")
