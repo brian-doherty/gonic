@@ -154,24 +154,24 @@ func (c *Controller) ServeGetAlbumListTwo(r *http.Request) *spec.Response {
 		q = q.Joins("JOIN artists ON artists.id=album_artists.artist_id")
 		q = q.Order("artists.name")
 	case "alphabeticalByName":
-		q = q.Order("tag_title")
+		q = q.Order("albums.tag_title")
 	case "byYear":
 		y1, y2 := params.GetOrInt("fromYear", 1800),
 			params.GetOrInt("toYear", 2200)
 		// support some clients sending wrong order like DSub
-		q = q.Where("tag_year BETWEEN ? AND ?", min(y1, y2), max(y1, y2))
-		q = q.Order("tag_year DESC")
+		q = q.Where("albums.tag_year BETWEEN ? AND ?", min(y1, y2), max(y1, y2))
+		q = q.Order("albums.tag_year DESC")
 	case "byGenre":
 		genre, _ := params.Get("genre")
 		q = q.Joins("JOIN album_genres ON album_genres.album_id=albums.id")
 		q = q.Joins("JOIN genres ON genres.id=album_genres.genre_id AND genres.name=?", genre)
-		q = q.Order("tag_title")
+		q = q.Order("albums.tag_title")
 	case "frequent":
 		user := r.Context().Value(CtxUser).(*db.User)
 		q = q.Joins("JOIN plays ON albums.id=plays.album_id AND plays.user_id=?", user.ID)
 		q = q.Order("plays.length DESC")
 	case "newest":
-		q = q.Order("created_at DESC")
+		q = q.Order("albums.created_at DESC")
 	case "random":
 		q = q.Order(gorm.Expr("random()"))
 	case "recent":
@@ -179,7 +179,7 @@ func (c *Controller) ServeGetAlbumListTwo(r *http.Request) *spec.Response {
 		q = q.Order("plays.time DESC")
 	case "starred":
 		q = q.Joins("JOIN album_stars ON albums.id=album_stars.album_id AND album_stars.user_id=?", user.ID)
-		q = q.Order("tag_title")
+		q = q.Order("albums.tag_title")
 	case "highest":
 		q = q.Joins("JOIN album_ratings ON album_ratings.album_id=albums.id AND album_ratings.user_id=?", user.ID)
 		q = q.Order("album_ratings.rating DESC")
