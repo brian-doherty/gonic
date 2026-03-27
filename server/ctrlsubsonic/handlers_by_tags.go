@@ -452,6 +452,7 @@ func (c *Controller) ServeGetGenres(_ *http.Request) *spec.Response {
 			(SELECT count(1) FROM album_genres WHERE genre_id=genres.id) album_count,
 			(SELECT count(1) FROM track_genres WHERE genre_id=genres.id) track_count`).
 		Group("genres.id").
+		Order("genres.name").
 		Find(&genres)
 	sub := spec.NewResponse()
 	sub.Genres = &spec.Genres{
