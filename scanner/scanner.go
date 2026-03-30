@@ -372,20 +372,30 @@ func (s *Scanner) scanDir(st *State, absPath string) error {
 		return nil
 	}
 
+	// read tags outside the transaction to avoid holding db locks during disk i/o
+	type trackTagData struct {
+		trackUpdate
+		trprops tags.Properties
+		trags   tags.Tags
+	}
+	tagData := make([]trackTagData, 0, len(trackUpdates))
+	for _, t := range trackUpdates {
+		trprops, trags, err := s.tagReader.Read(t.absPath)
+		if err != nil {
+			return fmt.Errorf("read %q: %w: %w", t.basename, err, ErrReadingTags)
+		}
+		tagData = append(tagData, trackTagData{trackUpdate: t, trprops: trprops, trags: trags})
+	}
+
 	return s.db.Transaction(func(tx *db.DB) error {
 		var discTitles = map[int]string{}
-		for _, t := range trackUpdates {
-			trprops, trags, err := s.tagReader.Read(t.absPath)
-			if err != nil {
-				return fmt.Errorf("read %q: %w: %w", t.basename, err, ErrReadingTags)
-			}
-
-			if err := s.populateTrackAndArtists(tx, st, t.i, &album, t.track, t.timeSpec, trprops, trags, t.basename, t.absPath); err != nil {
+		for _, t := range tagData {
+			if err := s.populateTrackAndArtists(tx, st, t.i, &album, t.track, t.timeSpec, t.trprops, t.trags, t.basename, t.absPath); err != nil {
 				return fmt.Errorf("populate track %q: %w", t.basename, err)
 			}
 
-			discNum := cmp.Or(tags.ParseInt(normtag.Get(trags, normtag.DiscNumber)), 1)
-			discSubtitle := normtag.Get(trags, "DISCSUBTITLE")
+			discNum := cmp.Or(tags.ParseInt(normtag.Get(t.trags, normtag.DiscNumber)), 1)
+			discSubtitle := normtag.Get(t.trags, "DISCSUBTITLE")
 
 			if _, exists := discTitles[discNum]; !exists && discSubtitle != "" {
 				discTitles[discNum] = discSubtitle

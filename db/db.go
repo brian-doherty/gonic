@@ -127,15 +127,15 @@ func (db *DB) TransactionChunked(data []int64, cb func(*DB, []int64) error) erro
 	}
 	// https://sqlite.org/limits.html
 	const size = 999
-	return db.Transaction(func(tx *DB) error {
-		for i := 0; i < len(data); i += size {
-			end := min(i+size, len(data))
-			if err := cb(tx, data[i:end]); err != nil {
-				return err
-			}
+	for i := 0; i < len(data); i += size {
+		end := min(i+size, len(data))
+		if err := db.Transaction(func(tx *DB) error {
+			return cb(tx, data[i:end])
+		}); err != nil {
+			return err
 		}
-		return nil
-	})
+	}
+	return nil
 }
 
 type SettingKey string
