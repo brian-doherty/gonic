@@ -203,6 +203,9 @@ func (c *Client) StealArtistImage(artistURL string) (string, error) {
 		return "", fmt.Errorf("get artist url: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 {
+		return "", fmt.Errorf("get artist url: %s", resp.Status)
+	}
 
 	node, err := html.Parse(resp.Body)
 	if err != nil {
